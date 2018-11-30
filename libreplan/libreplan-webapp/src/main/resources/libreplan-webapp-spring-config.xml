@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+
+    <!-- For enabling annotation-based configuration (in particular, required for "@Autowired") -->
+    <context:annotation-config />
+
+    <bean id="aspect" class="org.libreplan.web.common.concurrentdetection.ConcurrentModificationHandling" />
+
+    <bean class="org.libreplan.web.common.entrypoints.RedirectorSynthetiser"/>
+
+    <bean id="ordersMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.OrdersMultipleFiltersFinder"/>
+
+    <bean id="taskGroupsMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.TaskGroupsMultipleFiltersFinder"/>
+
+    <bean id="orderElementsMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.OrderElementsMultipleFiltersFinder"/>
+
+    <bean id="taskElementsMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.TaskElementsMultipleFiltersFinder"/>
+
+    <bean id="resourcesMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.ResourcesMultipleFiltersFinder"/>
+
+    <bean id="limitingResourceAllocationMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.LimitingResourceAllocationMultipleFiltersFinder"/>
+
+    <bean id="nonLimitingResourceAllocationMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.NonLimitingResourceAllocationMultipleFiltersFinder"/>
+
+    <bean id="resourceMultipleFiltersFinderByResourceAndCriterion"
+          class="org.libreplan.web.common.components.finders.ResourceMultipleFiltersFinderByResourceAndCriterion"/>
+
+    <bean id="criterionMultipleFiltersFinder"
+          class="org.libreplan.web.common.components.finders.CriterionMultipleFiltersFinder"/>
+
+    <bean id="scenarioManager" class="org.libreplan.web.scenarios.CurrentUserScenarioAwareManager"/>
+
+    <!-- Scheduler -->
+    <bean id="schedulerFactoryBean"
+          class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="false" />
+
+    <bean id="schedulerManager" class="org.libreplan.importers.SchedulerManager" init-method="scheduleJobs">
+        <property name="scheduler" ref="schedulerFactoryBean"/>
+    </bean>
+
+    <context:component-scan base-package="org.libreplan"/>
+
+    <!-- CXF -->
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+    <jaxrs:server id="rest" address="/">
+        <jaxrs:serviceBeans>
+            <ref bean="criterionServiceREST"/>
+            <ref bean="orderElementServiceREST"/>
+            <ref bean="resourceServiceREST"/>
+            <ref bean="subcontractServiceREST"/>
+            <ref bean="reportAdvancesServiceREST"/>
+            <ref bean="resourceHoursServiceREST"/>
+            <ref bean="workReportServiceREST"/>
+            <ref bean="labelServiceREST"/>
+            <ref bean="costCategoryServiceREST"/>
+            <ref bean="typeOfWorkHoursServiceREST"/>
+            <ref bean="calendarExceptionTypeServiceREST"/>
+            <ref bean="calendarServiceREST"/>
+            <ref bean="materialServiceREST"/>
+            <ref bean="unitTypeServiceREST"/>
+            <ref bean="expenseSheetServiceREST"/>
+            <ref bean="boundUserServiceREST"/>
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="runtimeExceptionMapper" />
+            <ref bean="instanceNotFoundExceptionMapper" />
+            <ref bean="incompatibleTypeExceptionMapper" />
+            <ref bean="hibernateOptimisticLockingFailureException" />
+        </jaxrs:providers>
+        <!-- FIXME: in root pom.xml, enable CXF logging on development and disable it in production.
+        <jaxrs:features>
+            <cxf:logging/>
+        </jaxrs:features>
+        -->
+    </jaxrs:server>
+
+</beans>
